@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDinGOV Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+  /* ── design tokens ── */
+  :root {
+    --bg:         #ECF0F5;
+    --surface:    #FFFFFF;
+    --surface-2:  #F4F7FA;
+    --ink-1:      #1A2B3C;
+    --ink-2:      #4E6375;
+    --ink-3:      #8BA3B8;
+    --accent:     #2B5F8E;
+    --accent-faint: #E4EEF7;
+    --border:     #CBD5E1;
+    --radius:     7px;
+
+    --c-aidan: #3454D1;
+    --c-gen:   #7A28A0;
+    --c-gavin: #1A7F54;
+    --c-rob:   #C25A00;
+    --c-sarah: #B81C1C;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:          #101820;
+      --surface:     #1B2738;
+      --surface-2:   #243344;
+      --ink-1:       #DDE6F0;
+      --ink-2:       #8BA3B8;
+      --ink-3:       #4E6375;
+      --accent:      #5D9FD4;
+      --accent-faint:#1A2F45;
+      --border:      #283D52;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg:          #101820;
+    --surface:     #1B2738;
+    --surface-2:   #243344;
+    --ink-1:       #DDE6F0;
+    --ink-2:       #8BA3B8;
+    --ink-3:       #4E6375;
+    --accent:      #5D9FD4;
+    --accent-faint:#1A2F45;
+    --border:      #283D52;
+  }
+
+  /* ── base ── */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink-1);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 14.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── wrapper ── */
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding-inline: 22px;
+    padding-block: 36px 72px;
+  }
+
+  /* ── masthead ── */
+  .masthead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .masthead-left { flex: 1 1 320px; }
+
+  .kicker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 7px;
+  }
+
+  h1 {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink-1);
+    margin: 0 0 3px;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .masthead-sub {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    flex-shrink: 0;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .legend-chip {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* ── day tabs ── */
+  .day-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .day-tab {
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.13s, border-color 0.13s, color 0.13s;
+  }
+
+  .day-tab:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .day-tab.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .day-tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── day panels ── */
+  .day-panel { display: none; }
+  .day-panel.is-active { display: block; }
+
+  /* ── slot (time block) ── */
+  .slot {
+    margin-bottom: 28px;
+  }
+
+  .slot-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .slot-time {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slot-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── session grid ── */
+  .talks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+  }
+
+  /* ── talk card ── */
+  .talk-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 14px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .talk-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--ink-1);
+    margin: 0;
+  }
+
+  .talk-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .talk-duration {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ink-3);
+    background: var(--surface-2);
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── attendance chips ── */
+  .talk-attendees {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: auto;
+    flex-wrap: wrap;
+  }
+
+  .person-chip {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0;
+    cursor: default;
+  }
+
+  .person-chip.attending {
+    color: #fff;
+  }
+
+  .person-chip.absent {
+    color: var(--ink-3);
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+  }
+
+  .person-chip.maybe {
+    color: #fff;
+    opacity: 0.55;
+    border: 1.5px dashed rgba(255,255,255,0.5);
+  }
+
+  /* scheduling note */
+  .overlap-note {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--c-rob);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: -2px;
+  }
+
+  /* ── attendee tally per day ── */
+  .day-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-bottom: 22px;
+    padding: 10px 14px;
+    background: var(--accent-faint);
+    border-radius: var(--radius);
+  }
+
+  .tally-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tally-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tally-count {
+    color: var(--ink-1);
+    font-weight: 600;
+  }
+
+  /* ── day note ── */
+  .day-note {
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+
+  /* ── reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .day-tab { transition: none; }
+  }
+
+  /* ── narrow screens ── */
+  @media (max-width: 540px) {
+    h1 { font-size: 21px; }
+    .talks-grid { grid-template-columns: 1fr; }
+    .masthead { flex-direction: column; align-items: flex-start; }
+    .day-tabs { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead-left">
+      <p class="kicker">Service Design in Government</p>
+      <h1>SDinGOV Conference Schedule</h1>
+      <p class="masthead-sub">Filled = attending &nbsp;·&nbsp; Faded = maybe &nbsp;·&nbsp; Ring = not marked</p>
+    </div>
+    <nav class="legend" aria-label="Team key" id="legend"></nav>
+  </header>
+
+  <div class="day-tabs" role="tablist" id="tabs"></div>
+  <div id="schedule"></div>
+
+</div>
+
+<script>
+const PEOPLE = [
+  { id: 'aidan', label: 'Aidan', init: 'A',  color: '#3454D1' },
+  { id: 'gen',   label: 'Gen',   init: 'Gn', color: '#7A28A0' },
+  { id: 'gavin', label: 'Gavin', init: 'Gv', color: '#1A7F54' },
+  { id: 'rob',   label: 'Rob',   init: 'R',  color: '#C25A00' },
+  { id: 'sarah', label: 'Sarah', init: 'S',  color: '#B81C1C' },
+];
+
+// a: map of personId → 1 (attending) | '?' (maybe) | omitted (not marked)
+const SCHEDULE = [
+  {
+    day: 'Day 1',
+    slots: [
+      {
+        time: '11:15 – 12:00',
+        talks: [
+          { title: 'Policy and service design as one – how Germany skips the silos',
+            a: { aidan: 1, gavin: 1, rob: 1 } },
+          { title: 'Accessibility full circle: embedding inclusion in service design',
+            a: {gen: 1} },
+        ]
+      },
+      {
+        time: '12:15 – 13:00',
+        talks: [
+          { title: 'Participatory design principles to heal, not hinder: the importance of psychologically-informed environments',
+            a: { aidan: 1, gen: 1 } },
+          { title: 'Whose reality shapes public services?',
+            a: { gavin: 1, rob: 1 } },
+        ]
+      },
+      {
+        time: '14:00 – 15:00',
+        talks: [
+          { title: 'A trauma-informed public sector: lessons from Northern Ireland',
+            a: { aidan: 1, gen: 1 } },
+          { title: 'Service Patterns UK live: building reusable patterns across the public sector',
+            a: { gavin: 1 } },
+          { title: 'Testing and learning a different way of doing design',
+            a: { rob: 1 } },
+        ]
+      },
+      {
+        time: '15:30 – 16:30',
+        talks: [
+          { title: 'Design skills for democracy',
+            a: { gavin: 1, rob: 1 } },
+          { title: 'Design rights: a human-rights based approach to digital design',
+            a: {} },
+          { title: 'Designing public services from strengths, not deficits',
+            a: {} },
+        ]
+      },
+    ]
+  },
+  {
+    day: 'Day 2',
+    slots: [
+      {
+        time: '11:15 – 12:00 / 12:45',
+        talks: [
+          { title: 'Design without designers: why democratising design is harder than we admit',
+            dur: '45 min', a: { aidan: 1, rob: 1 } },
+          { title: 'The GOV Reuse Library turns one: lessons from a year of growing reuse',
+            dur: '45 min', a: { gavin: 1 } },
+          { title: 'Who gets to decide? Sharing power in public services',
+            dur: '90 min', a: { gen: 1 } },
+          { title: 'Expecting the unexpected: planning resilience for your services',
+            dur: '90 min', a: {} },
+        ]
+      },
+      {
+        time: '12:15 – 13:00',
+        talks: [
+          { title: 'Democratising design through community of practice and the NHS service standard',
+            a: { gavin: 1 } },
+          { title: 'Personas without people: designing for organisations as complex users',
+            a: { aidan: 1 } },
+          { title: 'Co-designing the future: from youth hack to innovation studio',
+            a: { rob: 1 } },
+        ]
+      },
+      {
+        time: '14:00 – 15:00 / 16:45',
+        talks: [
+          { title: 'The data and analytics ecosystem: the hidden layer of the service transformation',
+            dur: '60 min', a: { gavin: 1 } },
+          { title: 'Living Well – designing an inclusive health service in rural Wales',
+            dur: '60 min', a: { aidan: 1 } },
+          { title: 'Mapping your career journey – what\'s next for you?',
+            dur: '165 min', a: { rob: 1 } },
+          { title: 'Let\'s use the lens of poverty: bringing people living in poverty into service design',
+            dur: '60 min', a: { gen: 1 } },
+          { title: 'Too many cooks: a game for designing across organisational boundaries when everyone owns a piece of the problem',
+            dur: '60 min', a: {} },
+        ]
+      },
+      {
+        time: '15:30 – 16:45',
+        talks: [
+          { title: 'Planning for democracy: co-designing public infrastructure with planners',
+            a: {} },
+          { title: 'Lost in translation: Policing, service design and speaking human',
+            a: { aidan: 1 } },
+          { title: 'Testing service patterns as practical codesign tools for MyCare.scot',
+            a: { gavin: 1 } },
+        ]
+      },
+    ]
+  },
+  {
+    day: 'Day 3',
+    slots: [
+      {
+        time: '11:15 – 12:00',
+        talks: [
+          { title: 'Social Presencing Theatre improving systems strategy in North Carolina',
+            a: { gavin: 1, rob: '?' } },
+          { title: 'Designing services that stay accessible over time',
+            a: { aidan: 1, gen: 1, rob: '?' } },
+        ]
+      },
+    ],
+    note: 'Day 3 schedule partially filled — additional sessions may be added.'
+  },
+];
+
+// ── legend ────────────────────────────────────────────────────────
+const legendEl = document.getElementById('legend');
+PEOPLE.forEach(p => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<span class="legend-chip" style="background:${p.color}">${p.init}</span>${p.label}`;
+  legendEl.appendChild(item);
+});
+
+// ── tabs & panels ─────────────────────────────────────────────────
+const tabsEl   = document.getElementById('tabs');
+const schedEl  = document.getElementById('schedule');
+
+function countAttending(dayData) {
+  const counts = {};
+  PEOPLE.forEach(p => counts[p.id] = 0);
+  dayData.slots.forEach(slot =>
+    slot.talks.forEach(talk =>
+      PEOPLE.forEach(p => { if (talk.a && talk.a[p.id] && talk.a[p.id] !== '?') counts[p.id]++; })
+    )
+  );
+  return counts;
+}
+
+SCHEDULE.forEach((dayData, di) => {
+  // tab button
+  const tab = document.createElement('button');
+  tab.className = 'day-tab' + (di === 0 ? ' is-active' : '');
+  tab.textContent = dayData.day;
+  tab.setAttribute('role', 'tab');
+  tab.setAttribute('aria-selected', di === 0 ? 'true' : 'false');
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => {
+      t.classList.remove('is-active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('is-active'));
+    tab.classList.add('is-active');
+    tab.setAttribute('aria-selected', 'true');
+    document.getElementById(`panel-${di}`).classList.add('is-active');
+  });
+  tabsEl.appendChild(tab);
+
+  // panel
+  const panel = document.createElement('div');
+  panel.className = 'day-panel' + (di === 0 ? ' is-active' : '');
+  panel.id = `panel-${di}`;
+  panel.setAttribute('role', 'tabpanel');
+
+  // attendance summary bar
+  const counts = countAttending(dayData);
+  const attending = PEOPLE.filter(p => counts[p.id] > 0);
+  if (attending.length) {
+    const summary = document.createElement('div');
+    summary.className = 'day-summary';
+    attending.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'tally-item';
+      item.innerHTML = `
+        <span class="tally-dot" style="background:${p.color}"></span>
+        ${p.label}
+        <span class="tally-count">${counts[p.id]}</span>
+        <span style="color:var(--ink-3);font-weight:400">${counts[p.id] === 1 ? 'session' : 'sessions'}</span>
+      `;
+      summary.appendChild(item);
+    });
+    panel.appendChild(summary);
+  }
+
+  // slots
+  dayData.slots.forEach(slot => {
+    const slotEl = document.createElement('div');
+    slotEl.className = 'slot';
+    slotEl.innerHTML = `
+      <div class="slot-header">
+        <span class="slot-time">${slot.time}</span>
+        <span class="slot-rule"></span>
+      </div>
+    `;
+
+    const grid = document.createElement('div');
+    grid.className = 'talks-grid';
+
+    slot.talks.forEach(talk => {
+      const card = document.createElement('div');
+      card.className = 'talk-card';
+
+      const titleEl = document.createElement('p');
+      titleEl.className = 'talk-title';
+      titleEl.textContent = talk.title;
+      card.appendChild(titleEl);
+
+      if (talk.dur) {
+        const meta = document.createElement('div');
+        meta.className = 'talk-meta';
+        meta.innerHTML = `<span class="talk-duration">${talk.dur}</span>`;
+        card.appendChild(meta);
+      }
+
+      // chips
+      const chipsEl = document.createElement('div');
+      chipsEl.className = 'talk-attendees';
+
+      PEOPLE.forEach(p => {
+        const val = talk.a && talk.a[p.id];
+        const isMaybe = val === '?';
+        const isAttending = val && !isMaybe;
+        const chip = document.createElement('span');
+        chip.className = 'person-chip ' + (isAttending ? 'attending' : isMaybe ? 'maybe' : 'absent');
+        if (isAttending || isMaybe) chip.style.background = p.color;
+        chip.textContent = isMaybe ? '?' : p.init;
+        chip.title = p.label + (isMaybe ? ' — maybe' : '');
+        chipsEl.appendChild(chip);
+      });
+
+      card.appendChild(chipsEl);
+      grid.appendChild(card);
+    });
+
+    slotEl.appendChild(grid);
+    panel.appendChild(slotEl);
+  });
+
+  if (dayData.note) {
+    const noteEl = document.createElement('p');
+    noteEl.className = 'day-note';
+    noteEl.textContent = dayData.note;
+    panel.appendChild(noteEl);
+  }
+
+  schedEl.appendChild(panel);
+});
+</script>
+</body>
+</html>
